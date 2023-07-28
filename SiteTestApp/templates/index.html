@@ -8,14 +8,38 @@
 <body>
     {% include 'header.html' %}
     <div class="container">
-        <form action="" method="post">
-            {% csrf_token %}
+        <form id="ttfb-form">
             <div class="search-container">
                 <input type="text" name="url" id="url-input" placeholder="Enter a URL">
                 <button type="submit" class="submit-button">Test Site</button>
             </div>
         </form>
     </div>
+
+    <div class="container">
+        <h3 id="ttfb-result">
+
+        </h3>
+    </div>
+
+    <script>
+        document.getElementById("ttfb-form").onsubmit = function (event) {
+            event.preventDefault();  // Prevent form submission
+            var url = document.getElementById("url-input").value;
+            fetch("/ttfb/?url=" + encodeURIComponent(url))
+                .then(response => response.json())
+                .then(data => {
+                    if (data.ttfb) {
+                        document.getElementById("ttfb-result").innerHTML = "TTFB: " + data.ttfb + " milliseconds";
+                    } else if (data.error) {
+                        document.getElementById("ttfb-result").innerHTML = "Error: " + data.error;
+                    }
+                })
+                .catch(error => {
+                    document.getElementById("ttfb-result").innerHTML = "Error: Unable to fetch TTFB." + error.message;
+                });
+        };
+    </script>
 
     {% include 'footer.html' %}
 </body>
