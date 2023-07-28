@@ -1,0 +1,22 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Website Tester</title>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
+</head>
+<body>
+    {% include 'header.html' %}
+    <div class="container">
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="search-container">
+                <input type="text" name="url" id="url-input" placeholder="Enter a URL">
+                <button type="submit" class="submit-button">Test Site</button>
+            </div>
+        </form>
+    </div>
+
+    {% include 'footer.html' %}
+</body>
+</html>
