@@ -4,14 +4,14 @@
 <head>
     <title>Website Tester</title>
     <link rel="stylesheet" type="text/css" href="{% static 'css/styles.css' %}">
-    <style>
-        /* styles.css */
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">    <style>
 
 body {
     background-color: #1a1a1a;
     color: #fff;
-    font-family: Arial, sans-serif;
-    padding: 10%;
+    font-family: 'Inter', sans-serif;
+    padding: 0%;
+    margin: 0%;
 }
 
 .container {
@@ -19,13 +19,11 @@ body {
     justify-content: center;
     align-items: center;
     height: 10vh;
-    margin-top: 10%;
 }
 
 .search-container {
     position: relative;
-    margin: 20px auto;
-    max-width: 600px;
+    max-width: 1000px;
     text-align: center;
 }
 
@@ -37,6 +35,8 @@ body {
     border-radius: 5px;
     font-size: 16px;
     width: 300px;
+    min-width: 400px; 
+    max-width: 1400px; 
 }
 
 .search-button {
@@ -62,7 +62,6 @@ input[type="text"] {
     background-color: white;
 }
 
-/* Style for the submit button */
 button.submit-button {
     padding: 8px 15px;
     background-color: #333;
@@ -72,31 +71,69 @@ button.submit-button {
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s ease;
-    width: 100px; /* Add this line to set the button width */
-    margin-left: -27%;
+    width: 100px;
+    margin-left: -21%;
 }
 
 button.submit-button:hover {
     background-color: #555;
 }
 
+@keyframes pulse {
+    0%, 100% {
+            transform: scale(1);
+            opacity: 0.25;
+        }
+        10%, 90% {
+            transform: scale(1.05);
+            opacity: 0.5;
+        }
+        20%, 80% {
+            transform: scale(1.1);
+            opacity: 0.6;
+        }
+        30%, 70% {
+            transform: scale(1.15);
+            opacity: 0.7;
+        }
+        40%, 60% {
+            transform: scale(1.2);
+            opacity: 0.8;
+        }
+        50% {
+            transform: scale(1.25);
+            opacity: 0.9;
+        }
+}
+
+    .loading-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: #fff;
+        animation: pulse 1s ease-in-out infinite;
+        display: none;
+    }
+
 /* Styles specific to phones */
 @media (max-width: 767px) {
     .search-button {
         position: relative;
-        /* Adjust other styles for phones as needed */
+        width: auto;
     }
 
     button.submit-button {
-        width: 75%; 
-        margin-top: 5%; /* Specify the top margin as needed */
-        margin-right: auto; /* Set right margin to auto */
-        margin-bottom: auto; /* Set bottom margin to auto */
-        margin-left: auto; /* Set left margin to auto */
+        width: 25%; 
+        margin-top: 5%; 
+        margin-right: auto; 
+        margin-bottom: auto; 
+        margin-left: auto;
         max-width: 600px;
         text-align: center;
         
     }
+
+   
 }
     </style>
 </head>
@@ -106,35 +143,61 @@ button.submit-button:hover {
         <form id="ttfb-form">
             <div class="search-container">
                 <input type="text" name="url" id="url-input" placeholder="Enter a URL">
-                <button type="submit" class="submit-button">Test Site</button>
+                <button type="submit" class="submit-button" onclick="startLoading()">Test Site</button>
             </div>
         </form>
     </div>
 
     <div class="container">
+        <div class="loading-icon"></div>
         <h3 id="ttfb-result">
 
         </h3>
     </div>
 
     <script>
+       function startLoading() {
+            var loadingIcon = document.querySelector(".loading-icon");
+            loadingIcon.style.display = "block";
+        }
+
+
         document.getElementById("ttfb-form").onsubmit = function (event) {
-            event.preventDefault();  // Prevent form submission
+            event.preventDefault();
             var url = document.getElementById("url-input").value;
+            var loadingIcon = document.querySelector(".loading-icon");
+            loadingIcon.style.display = "block"; 
+
             fetch("/ttfb/?url=" + encodeURIComponent(url))
                 .then(response => response.json())
                 .then(data => {
-                    if (data.ttfb) {
-                        document.getElementById("ttfb-result").innerHTML = "TTFB: " + data.ttfb + " milliseconds";
-                    } else if (data.error) {
-                        document.getElementById("ttfb-result").innerHTML = "Error: " + data.error;
+                    var remainingTime = 3000 - (Date.now() - startTime);
+                    if (remainingTime > 0) {
+                        setTimeout(() => {
+                            loadingIcon.style.display = "none"; 
+                            displayResult(data);
+                        }, remainingTime);
+                    } else {
+                        loadingIcon.style.display = "none"; 
+                        displayResult(data); 
                     }
                 })
                 .catch(error => {
+                    loadingIcon.style.display = "none";
                     document.getElementById("ttfb-result").innerHTML = "Error: Unable to fetch TTFB." + error.message;
                 });
+            
+            var startTime = Date.now();
         };
-    </script>
+
+        function displayResult(data) {
+            if (data.ttfb) {
+                document.getElementById("ttfb-result").innerHTML = "TTFB: " + data.ttfb + " milliseconds";
+            } else if (data.error) {
+                document.getElementById("ttfb-result").innerHTML = "Error: " + data.error;
+            }
+        }
+        </script>
 
     {% include 'footer.html' %}
 </body>
