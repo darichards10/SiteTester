@@ -2,6 +2,7 @@ from django.shortcuts import render
 import requests
 from django.http import JsonResponse
 from urllib.parse import urlparse
+import os
 
 def calculate_ttfb(request):
     if 'url' in request.GET:
@@ -9,10 +10,29 @@ def calculate_ttfb(request):
         if not urlparse(url).scheme:
             url = 'https://' + url
         try:
-            response = requests.get(url)
+            response = requests.get(url, cookies=[])
             response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
+            fcp = response.headers.get('first-contentful-paint')
             ttfb = response.elapsed.total_seconds()
-            return JsonResponse({'ttfb': ttfb})
+            print("FCP Header:", fcp)
+
+            try:
+                # Use a command-line call or a library to run Lighthouse and get the report
+                lighthouse_command = f'lighthouse {url} --output=json --quiet'
+                report = os.popen(lighthouse_command).read()
+
+                # Parse the report to extract the Speed Index value
+                import json
+                report_data = json.loads(report)
+                speed_index = report_data['audits']['speed-index']['numericValue']
+            except Exception as e:
+                speed_index = e.args[0]
+
+            return JsonResponse({
+                'ttfb': ttfb,
+                'fcp': fcp,
+                'speed_index': speed_index,            
+           })
         except requests.exceptions.RequestException as e:
             return JsonResponse({'error': str(e)})
     else:
