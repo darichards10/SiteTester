@@ -12,9 +12,7 @@ def calculate_ttfb(request):
         try:
             response = requests.get(url, cookies=[])
             response.raise_for_status()  # Raise an exception for 4xx and 5xx status codes
-            fcp = response.headers.get('first-contentful-paint')
             ttfb = response.elapsed.total_seconds()
-            print("FCP Header:", fcp)
 
             try:
                 # Use a command-line call or a library to run Lighthouse and get the report
@@ -30,7 +28,6 @@ def calculate_ttfb(request):
 
             return JsonResponse({
                 'ttfb': ttfb,
-                'fcp': fcp,
                 'speed_index': speed_index,            
            })
         except requests.exceptions.RequestException as e:
