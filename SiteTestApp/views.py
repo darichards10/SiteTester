@@ -113,6 +113,7 @@ def test_all_links(links):
             )
 
 
+
             print(f"Testing URL: {url} - Load Time: {load_time} - Time to Interactive: {time_to_interactive} - Time to First Byte: {time_to_first_byte} - LCP: {lcp_data['LCP']} - Page Size: {page_size}")
 
 
