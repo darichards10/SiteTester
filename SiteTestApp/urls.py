@@ -1,9 +1,8 @@
 from django.urls import path
-
 from . import views
-from .views import calculate_ttfb
+from .views import run_test
 
 urlpatterns = [
     path("", views.index, name="index"),
-    path('ttfb/', calculate_ttfb, name='ttfb'),
+    path('run_test/', run_test, name='run_python_program'),
 ]
